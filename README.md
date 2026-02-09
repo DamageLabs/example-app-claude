@@ -1,40 +1,97 @@
-# example-app-claude
+# CellarSync
 
-A project documenting the process of building an example application entirely using Claude Code. This repo serves as a reference for workflows, patterns, and practices when developing software with AI-assisted coding through Claude Code.
+Wine collection inventory management system for personal and small group use.
 
-## AI-Assisted Development Workflow
+**Tech Stack:** React 19 + Vite | Fastify | SQLite + Drizzle ORM | GitHub Actions CI/CD
 
-This project follows a structured, AI-driven workflow from concept to implementation:
+## Quick Start
 
-```
-1. Create PRD
-   Define the product requirements document with full technical
-   architecture, functional specs, and delivery milestones.
-         │
-         ▼
-2. Generate GitHub Issues from PRD
-   Break the PRD down into trackable, actionable GitHub issues
-   organized by phase and labeled by category.
-         │
-         ▼
-3. Generate Roadmap from GitHub Issues
-   Produce a comprehensive roadmap that maps issues to milestones,
-   defines dependencies, and establishes delivery timelines.
-         │
-         ▼
-4. Implement (issue by issue)
-   Work through the roadmap, using GitHub issues as the unit of
-   work, with CI/CD validating each change.
+```bash
+# Prerequisites: Node.js >= 20, npm >= 10
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+
+# Run database migrations and seed with sample data
+npm run db:migrate
+npm run db:seed
+
+# Start development servers (API + Web concurrently)
+npm run dev
 ```
 
-Each step is executed with Claude Code, producing artifacts that feed into the next stage. The goal is a fully traceable path from product idea to deployed software.
+- **API:** http://localhost:3001
+- **Web:** http://localhost:5173 (proxies `/api` to the API server)
 
-## Project: CellarSync
+## Test Accounts
 
-A wine collection inventory management system for personal and small group use. See [docs/PRD.md](docs/PRD.md) for the full product requirements document.
+| Role   | Email                      | Password         |
+|--------|----------------------------|------------------|
+| Admin  | admin@cellarsync.local     | adminpassword1   |
+| Member | member@cellarsync.local    | memberpassword1  |
 
-**Tech Stack:** React SPA | Fastify | SQLite | GCP VM | GitHub Actions CI/CD
+## Available Scripts
+
+| Script               | Description                                    |
+|----------------------|------------------------------------------------|
+| `npm run dev`        | Start API and Web dev servers concurrently     |
+| `npm run build`      | Build web app for production                   |
+| `npm run lint`       | Run ESLint across all packages                 |
+| `npm run lint:fix`   | Run ESLint with auto-fix                       |
+| `npm run typecheck`  | TypeScript type checking across all packages   |
+| `npm run test`       | Run all tests                                  |
+| `npm run test:unit`  | Run unit tests only                            |
+| `npm run test:functional` | Run functional/API tests               |
+| `npm run test:e2e`   | Run Playwright end-to-end tests                |
+| `npm run test:coverage` | Run tests with coverage report              |
+| `npm run db:migrate` | Run database migrations                        |
+| `npm run db:seed`    | Seed database with sample data                 |
+| `npm run db:studio`  | Open Drizzle Studio (visual DB browser)        |
+| `npm run format`     | Format code with Prettier                      |
+| `npm run format:check` | Check code formatting                        |
+
+## Project Structure
+
+```
+cellarsync/
+├── packages/
+│   └── shared/           # Zod schemas, TypeScript types, constants
+├── apps/
+│   ├── api/              # Fastify backend (port 3001)
+│   │   ├── src/
+│   │   │   ├── routes/   # API route handlers
+│   │   │   ├── db/       # Drizzle schema, migrations, seed
+│   │   │   ├── services/ # Business logic
+│   │   │   ├── plugins/  # Fastify plugins (JWT, etc.)
+│   │   │   └── middleware/
+│   │   ├── drizzle/      # Migration files
+│   │   └── tests/
+│   └── web/              # React SPA (port 5173)
+│       ├── src/
+│       └── tests/
+├── docs/
+│   ├── PRD.md            # Product requirements document
+│   └── ROADMAP.md        # Development roadmap
+└── data/                 # SQLite databases (gitignored)
+```
+
+## API Endpoints
+
+```
+GET  /api/health           # Health check
+POST /api/auth/login       # Login (returns JWT tokens)
+POST /api/auth/refresh     # Refresh access token
+POST /api/auth/logout      # Invalidate refresh token
+```
+
+## Documentation
+
+- [Product Requirements Document](docs/PRD.md)
+- [Development Roadmap](docs/ROADMAP.md)
 
 ## License
 
-This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
+Apache License 2.0 — see [LICENSE](LICENSE).
