@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+out
+coverage
+data
+.drizzle
+apps/api/drizzle
+playwright-report
+test-results
