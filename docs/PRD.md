@@ -52,22 +52,22 @@ The application is intentionally simple, self-hosted, and optimized for a small 
 
 ### Primary Goals
 
-| Goal | Description |
-|------|-------------|
-| **G1** | Provide a complete digital inventory of a wine collection accessible from any device |
+| Goal   | Description                                                                                                         |
+| ------ | ------------------------------------------------------------------------------------------------------------------- |
+| **G1** | Provide a complete digital inventory of a wine collection accessible from any device                                |
 | **G2** | Enable fast lookup — find any bottle by producer, region, vintage, varietal, or storage location in under 2 seconds |
-| **G3** | Track the full lifecycle of a bottle: acquisition, storage, consumption, and review |
-| **G4** | Support a small group of users with distinct accounts sharing a single collection |
+| **G3** | Track the full lifecycle of a bottle: acquisition, storage, consumption, and review                                 |
+| **G4** | Support a small group of users with distinct accounts sharing a single collection                                   |
 
 ### Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Inventory accuracy | 100% of physical bottles represented digitally | Manual audit |
-| Search latency (p95) | < 500ms for filtered queries across 10,000 bottles | Application logs |
-| Data durability | Zero data loss events | Backup verification |
-| Test coverage | >= 80% line coverage across all test suites | CI reports |
-| Uptime | 99% monthly (allows ~7h downtime/month, acceptable for personal use) | GCP monitoring |
+| Metric               | Target                                                               | Measurement         |
+| -------------------- | -------------------------------------------------------------------- | ------------------- |
+| Inventory accuracy   | 100% of physical bottles represented digitally                       | Manual audit        |
+| Search latency (p95) | < 500ms for filtered queries across 10,000 bottles                   | Application logs    |
+| Data durability      | Zero data loss events                                                | Backup verification |
+| Test coverage        | >= 80% line coverage across all test suites                          | CI reports          |
+| Uptime               | 99% monthly (allows ~7h downtime/month, acceptable for personal use) | GCP monitoring      |
 
 ---
 
@@ -87,6 +87,7 @@ The person who hosts the application, manages backups, and creates user accounts
 ### User Stories
 
 #### Inventory Management
+
 - **US-1:** As a collector, I want to add a new bottle to my inventory so that my collection is digitally tracked.
 - **US-2:** As a collector, I want to scan or search for a wine by name, producer, or barcode so I can quickly add bottles without typing everything manually.
 - **US-3:** As a collector, I want to assign a storage location (cellar, rack, row, column) to each bottle so I can physically find it.
@@ -94,19 +95,23 @@ The person who hosts the application, manages backups, and creates user accounts
 - **US-5:** As a collector, I want to mark a bottle as consumed, recording the date, occasion, and optionally a tasting note.
 
 #### Search & Browse
+
 - **US-6:** As a collector, I want to filter my inventory by region, varietal, vintage, producer, color (red/white/rosé/sparkling/dessert), or drink window so I can decide what to open.
 - **US-7:** As a household member, I want to search for "something red from Burgundy under $50" so I can pick a bottle for dinner.
 - **US-8:** As a collector, I want to see bottles approaching their optimal drink window so I don't miss peak readiness.
 
 #### Tasting Notes & Ratings
+
 - **US-9:** As a collector, I want to add tasting notes (appearance, nose, palate, finish) and a personal rating (1–100 or 5-star) to any bottle I've consumed.
 - **US-10:** As a collector, I want to view my tasting history to remember what I liked.
 
 #### Collection Analytics
+
 - **US-11:** As a collector, I want to see a dashboard summarizing my collection: total bottles, total value, breakdown by region/varietal/vintage, and consumption rate.
 - **US-12:** As a collector, I want to see my consumption history over time (bottles per month, average rating).
 
 #### Administration
+
 - **US-13:** As an admin, I want to create and manage user accounts (invite-only, no public registration) so I control who accesses the collection.
 - **US-14:** As an admin, I want to export my entire collection as CSV or JSON for backup or migration purposes.
 - **US-15:** As an admin, I want the system to perform automatic daily backups of the SQLite database.
@@ -119,42 +124,43 @@ The person who hosts the application, manages backups, and creates user accounts
 
 Each wine entry must capture:
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `name` | string | Yes | Wine name / cuvée |
-| `producer` | string | Yes | Winery / domaine / château |
-| `region` | string | Yes | e.g., Burgundy, Napa Valley, Barossa |
-| `sub_region` | string | No | e.g., Gevrey-Chambertin, Oakville |
-| `country` | string | Yes | |
-| `vintage` | integer | No | Null for NV (non-vintage) |
-| `varietal` | string | Yes | Primary grape(s) or blend name |
-| `color` | enum | Yes | red, white, rosé, sparkling, dessert, fortified, orange |
-| `bottle_size` | enum | Yes | 375ml, 750ml, 1.5L, 3L, other |
-| `alcohol_pct` | decimal | No | ABV percentage |
-| `drink_from` | integer | No | Year (start of drink window) |
-| `drink_to` | integer | No | Year (end of drink window) |
-| `notes` | text | No | General notes about the wine |
+| Field         | Type    | Required | Notes                                                   |
+| ------------- | ------- | -------- | ------------------------------------------------------- |
+| `name`        | string  | Yes      | Wine name / cuvée                                       |
+| `producer`    | string  | Yes      | Winery / domaine / château                              |
+| `region`      | string  | Yes      | e.g., Burgundy, Napa Valley, Barossa                    |
+| `sub_region`  | string  | No       | e.g., Gevrey-Chambertin, Oakville                       |
+| `country`     | string  | Yes      |                                                         |
+| `vintage`     | integer | No       | Null for NV (non-vintage)                               |
+| `varietal`    | string  | Yes      | Primary grape(s) or blend name                          |
+| `color`       | enum    | Yes      | red, white, rosé, sparkling, dessert, fortified, orange |
+| `bottle_size` | enum    | Yes      | 375ml, 750ml, 1.5L, 3L, other                           |
+| `alcohol_pct` | decimal | No       | ABV percentage                                          |
+| `drink_from`  | integer | No       | Year (start of drink window)                            |
+| `drink_to`    | integer | No       | Year (end of drink window)                              |
+| `notes`       | text    | No       | General notes about the wine                            |
 
 ### FR-2: Inventory (Bottle) Tracking
 
 Each physical bottle is a separate inventory record linked to a wine entry:
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `wine_id` | FK | Yes | References wine catalog |
-| `storage_location` | string | No | Free-text or structured (see FR-3) |
-| `purchase_date` | date | No | |
-| `purchase_price` | decimal | No | |
-| `purchase_source` | string | No | Shop, auction, winery, gift |
-| `status` | enum | Yes | in_stock, consumed, gifted, sold, spoiled |
-| `consumed_date` | date | No | Set when status changes |
-| `added_by` | FK | Yes | User who added the bottle |
+| Field              | Type    | Required | Notes                                     |
+| ------------------ | ------- | -------- | ----------------------------------------- |
+| `wine_id`          | FK      | Yes      | References wine catalog                   |
+| `storage_location` | string  | No       | Free-text or structured (see FR-3)        |
+| `purchase_date`    | date    | No       |                                           |
+| `purchase_price`   | decimal | No       |                                           |
+| `purchase_source`  | string  | No       | Shop, auction, winery, gift               |
+| `status`           | enum    | Yes      | in_stock, consumed, gifted, sold, spoiled |
+| `consumed_date`    | date    | No       | Set when status changes                   |
+| `added_by`         | FK      | Yes      | User who added the bottle                 |
 
 A single wine entry can have many bottle records (e.g., 6 bottles of the same wine).
 
 ### FR-3: Storage Location Management
 
 Users can define a hierarchical storage structure:
+
 - **Location** (e.g., "Basement Cellar", "Kitchen Rack")
   - **Zone/Section** (e.g., "Left wall", "Top shelf")
     - **Position** (e.g., "Row 3, Col 5")
@@ -163,18 +169,18 @@ This is optional — users can also use free-text location strings for simpler s
 
 ### FR-4: Tasting Notes
 
-| Field | Type | Required |
-|-------|------|----------|
-| `bottle_id` | FK | Yes |
-| `user_id` | FK | Yes |
-| `tasted_date` | date | Yes |
-| `rating` | integer | No | 1–100 scale |
-| `appearance` | text | No |
-| `nose` | text | No |
-| `palate` | text | No |
-| `finish` | text | No |
-| `overall_notes` | text | No |
-| `occasion` | string | No |
+| Field           | Type    | Required |
+| --------------- | ------- | -------- | ----------- |
+| `bottle_id`     | FK      | Yes      |
+| `user_id`       | FK      | Yes      |
+| `tasted_date`   | date    | Yes      |
+| `rating`        | integer | No       | 1–100 scale |
+| `appearance`    | text    | No       |
+| `nose`          | text    | No       |
+| `palate`        | text    | No       |
+| `finish`        | text    | No       |
+| `overall_notes` | text    | No       |
+| `occasion`      | string  | No       |
 
 ### FR-5: Search & Filtering
 
@@ -210,12 +216,12 @@ This is optional — users can also use free-text location strings for simpler s
 
 ### Performance
 
-| Requirement | Target |
-|-------------|--------|
-| Initial page load (cold) | < 3s on broadband |
-| API response time (p95) | < 500ms for queries up to 10,000 bottles |
-| Search response time (p95) | < 300ms using FTS5 |
-| Concurrent users supported | 5–10 simultaneous |
+| Requirement                | Target                                   |
+| -------------------------- | ---------------------------------------- |
+| Initial page load (cold)   | < 3s on broadband                        |
+| API response time (p95)    | < 500ms for queries up to 10,000 bottles |
+| Search response time (p95) | < 300ms using FTS5                       |
+| Concurrent users supported | 5–10 simultaneous                        |
 
 ### Reliability
 
@@ -273,33 +279,33 @@ This application is intentionally designed for small-scale use. Scaling beyond a
 
 #### Frontend (React SPA)
 
-| Choice | Recommendation | Rationale |
-|--------|---------------|-----------|
-| Build tool | **Vite** | Fast HMR, native ESM, excellent React support |
-| Routing | **React Router v7** | Industry standard, file-based routing optional |
-| State management | **TanStack Query** | Server state caching, automatic refetching, optimistic updates |
-| UI components | **shadcn/ui + Tailwind CSS** | Accessible components, utility-first CSS, minimal bundle |
-| Forms | **React Hook Form + Zod** | Performant forms with schema validation shared with backend |
-| Charts | **Recharts** | Lightweight, React-native charting for dashboard |
+| Choice           | Recommendation               | Rationale                                                      |
+| ---------------- | ---------------------------- | -------------------------------------------------------------- |
+| Build tool       | **Vite**                     | Fast HMR, native ESM, excellent React support                  |
+| Routing          | **React Router v7**          | Industry standard, file-based routing optional                 |
+| State management | **TanStack Query**           | Server state caching, automatic refetching, optimistic updates |
+| UI components    | **shadcn/ui + Tailwind CSS** | Accessible components, utility-first CSS, minimal bundle       |
+| Forms            | **React Hook Form + Zod**    | Performant forms with schema validation shared with backend    |
+| Charts           | **Recharts**                 | Lightweight, React-native charting for dashboard               |
 
 #### Backend (Node.js API)
 
-| Choice | Recommendation | Rationale |
-|--------|---------------|-----------|
-| Framework | **Fastify** | Faster than Express, built-in schema validation, good DX |
-| SQLite driver | **better-sqlite3** | Synchronous API (no callback hell), fastest Node SQLite driver |
-| Query builder | **Drizzle ORM** | Type-safe, lightweight, excellent SQLite support, SQL-like syntax |
-| Validation | **Zod** | Shared schemas between frontend and backend |
-| Auth | **@fastify/jwt** | JWT signing/verification, refresh token support |
-| Full-text search | **SQLite FTS5** | Built-in, no external dependency |
+| Choice           | Recommendation     | Rationale                                                         |
+| ---------------- | ------------------ | ----------------------------------------------------------------- |
+| Framework        | **Fastify**        | Faster than Express, built-in schema validation, good DX          |
+| SQLite driver    | **better-sqlite3** | Synchronous API (no callback hell), fastest Node SQLite driver    |
+| Query builder    | **Drizzle ORM**    | Type-safe, lightweight, excellent SQLite support, SQL-like syntax |
+| Validation       | **Zod**            | Shared schemas between frontend and backend                       |
+| Auth             | **@fastify/jwt**   | JWT signing/verification, refresh token support                   |
+| Full-text search | **SQLite FTS5**    | Built-in, no external dependency                                  |
 
 #### Shared
 
-| Choice | Recommendation | Rationale |
-|--------|---------------|-----------|
-| Language | **TypeScript** | End-to-end type safety |
-| Monorepo | **npm workspaces** | Simple, no extra tooling (Turborepo if build speed becomes a concern) |
-| Validation schemas | **Zod (shared package)** | Single source of truth for API contracts |
+| Choice             | Recommendation           | Rationale                                                             |
+| ------------------ | ------------------------ | --------------------------------------------------------------------- |
+| Language           | **TypeScript**           | End-to-end type safety                                                |
+| Monorepo           | **npm workspaces**       | Simple, no extra tooling (Turborepo if build speed becomes a concern) |
+| Validation schemas | **Zod (shared package)** | Single source of truth for API contracts                              |
 
 ### Data Flow
 
@@ -323,6 +329,7 @@ User Action (React)
 ### SQLite Schema Considerations
 
 #### WAL Mode (Write-Ahead Logging)
+
 ```sql
 PRAGMA journal_mode = WAL;
 PRAGMA busy_timeout = 5000;
@@ -332,16 +339,19 @@ PRAGMA foreign_keys = ON;
 ```
 
 **Why WAL mode:**
+
 - Allows concurrent reads while a write is in progress
 - Significantly better read performance for multi-user scenarios
 - Only one writer at a time (acceptable for 5–10 users)
 
 #### Concurrency Strategy
+
 - SQLite allows **one writer at a time**. With `busy_timeout = 5000`, write attempts will retry for up to 5 seconds before failing.
 - For this application's scale (5–10 concurrent users, mostly reads), this is sufficient.
 - Write-heavy operations (bulk import) should use transactions to batch writes.
 
 #### Backup Strategy
+
 - **Daily backup:** Copy the database file using `.backup` API (safe even while DB is in use with WAL mode)
 - **Backup location:** Separate directory on the VM + optional GCS bucket upload
 - **Retention:** 30 days local, 90 days in GCS
@@ -469,14 +479,14 @@ CREATE INDEX idx_tasting_notes_rating ON tasting_notes(rating);
 
 ### GCP VM Configuration
 
-| Setting | Value | Rationale |
-|---------|-------|-----------|
-| Machine type | **e2-small** (2 vCPU, 2GB RAM) | Sufficient for <10 concurrent users |
-| OS | **Ubuntu 24.04 LTS** | Long-term support, wide tooling compatibility |
-| Disk | **20GB balanced persistent disk** | SSD-backed for SQLite performance |
-| Region | User's nearest GCP region | Latency optimization |
-| Static IP | **Reserved external IP** | Stable DNS target |
-| Firewall | Allow TCP 80, 443 only | HTTPS via Let's Encrypt |
+| Setting      | Value                             | Rationale                                     |
+| ------------ | --------------------------------- | --------------------------------------------- |
+| Machine type | **e2-small** (2 vCPU, 2GB RAM)    | Sufficient for <10 concurrent users           |
+| OS           | **Ubuntu 24.04 LTS**              | Long-term support, wide tooling compatibility |
+| Disk         | **20GB balanced persistent disk** | SSD-backed for SQLite performance             |
+| Region       | User's nearest GCP region         | Latency optimization                          |
+| Static IP    | **Reserved external IP**          | Stable DNS target                             |
+| Firewall     | Allow TCP 80, 443 only            | HTTPS via Let's Encrypt                       |
 
 ### Software Stack on VM
 
@@ -490,11 +500,11 @@ Nginx (reverse proxy, static file serving, TLS termination)
 
 Three environments, with parity maintained through shared configuration:
 
-| Environment | Database | API URL | Purpose |
-|-------------|----------|---------|---------|
-| **Local dev** | `./data/cellar-dev.db` | `http://localhost:3001` | Development |
-| **Test/CI** | `:memory:` or `./data/cellar-test.db` | N/A (in-process) | Automated testing |
-| **Production** | `/var/data/cellarsync/cellar.db` | `https://cellarsync.yourdomain.com` | Live |
+| Environment    | Database                              | API URL                             | Purpose           |
+| -------------- | ------------------------------------- | ----------------------------------- | ----------------- |
+| **Local dev**  | `./data/cellar-dev.db`                | `http://localhost:3001`             | Development       |
+| **Test/CI**    | `:memory:` or `./data/cellar-test.db` | N/A (in-process)                    | Automated testing |
+| **Production** | `/var/data/cellarsync/cellar.db`      | `https://cellarsync.yourdomain.com` | Live              |
 
 Environment variables (`.env` file, not committed):
 
@@ -602,19 +612,20 @@ cellarsync/
 
 ### Development Experience
 
-| Feature | Tool | Details |
-|---------|------|---------|
-| Frontend hot reload | Vite HMR | Instant updates on save |
-| Backend hot reload | **tsx watch** | Restarts Fastify on file change |
-| Concurrent dev servers | **concurrently** | Single `npm run dev` starts both |
-| Database viewer | **Drizzle Studio** | `npm run db:studio` for visual DB browsing |
-| API testing | **Bruno** or **HTTPie** | Recommended for manual endpoint testing |
-| Linting | **ESLint + Prettier** | Shared config across workspaces |
-| Type checking | **TypeScript** (strict mode) | `npm run typecheck` across all packages |
+| Feature                | Tool                         | Details                                    |
+| ---------------------- | ---------------------------- | ------------------------------------------ |
+| Frontend hot reload    | Vite HMR                     | Instant updates on save                    |
+| Backend hot reload     | **tsx watch**                | Restarts Fastify on file change            |
+| Concurrent dev servers | **concurrently**             | Single `npm run dev` starts both           |
+| Database viewer        | **Drizzle Studio**           | `npm run db:studio` for visual DB browsing |
+| API testing            | **Bruno** or **HTTPie**      | Recommended for manual endpoint testing    |
+| Linting                | **ESLint + Prettier**        | Shared config across workspaces            |
+| Type checking          | **TypeScript** (strict mode) | `npm run typecheck` across all packages    |
 
 ### Seed Data
 
 Development seed data should include:
+
 - 2 user accounts (1 admin, 1 member)
 - ~50 wines across diverse regions and varietals
 - ~120 bottles (some wines with multiple bottles)
@@ -642,25 +653,26 @@ Development seed data should include:
 
 ### Test Tooling
 
-| Layer | Tool | Scope |
-|-------|------|-------|
-| Unit (backend) | **Vitest** | Pure functions, schema validation, utilities, service methods (mocked DB) |
-| Unit (frontend) | **Vitest + React Testing Library** | Component rendering, hooks, user interactions |
-| Functional (API) | **Vitest + Supertest** | Full HTTP request/response cycle against Fastify with a test SQLite DB |
-| Feature / E2E | **Playwright** | Browser-based user workflows across frontend + backend |
+| Layer            | Tool                               | Scope                                                                     |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------- |
+| Unit (backend)   | **Vitest**                         | Pure functions, schema validation, utilities, service methods (mocked DB) |
+| Unit (frontend)  | **Vitest + React Testing Library** | Component rendering, hooks, user interactions                             |
+| Functional (API) | **Vitest + Supertest**             | Full HTTP request/response cycle against Fastify with a test SQLite DB    |
+| Feature / E2E    | **Playwright**                     | Browser-based user workflows across frontend + backend                    |
 
 ### Coverage Targets
 
-| Area | Line Coverage | Branch Coverage |
-|------|--------------|-----------------|
-| Shared schemas | >= 95% | >= 90% |
-| API routes & services | >= 85% | >= 80% |
-| React components | >= 75% | >= 70% |
-| Overall | >= 80% | >= 75% |
+| Area                  | Line Coverage | Branch Coverage |
+| --------------------- | ------------- | --------------- |
+| Shared schemas        | >= 95%        | >= 90%          |
+| API routes & services | >= 85%        | >= 80%          |
+| React components      | >= 75%        | >= 70%          |
+| Overall               | >= 80%        | >= 75%          |
 
 ### Unit Tests (~150 tests)
 
 **Backend unit tests:**
+
 - Zod schema validation (valid input, invalid input, edge cases for each entity)
 - Service-layer business logic with mocked database
   - Wine CRUD operations
@@ -671,6 +683,7 @@ Development seed data should include:
 - Auth utilities (JWT token generation, password hashing)
 
 **Frontend unit tests:**
+
 - Component rendering (wine card, bottle list, tasting form, search bar, dashboard charts)
 - Custom hooks (useWines, useBottles, useSearch, useAuth)
 - Form validation behavior
@@ -692,6 +705,7 @@ API endpoint tests using Supertest against a real Fastify instance with a test S
 - **Authorization:** member vs. admin permissions, accessing other users' data
 
 Each functional test:
+
 1. Seeds a fresh test database (using in-memory SQLite or a temp file)
 2. Executes HTTP requests
 3. Asserts response status, headers, and body
@@ -737,7 +751,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
@@ -750,7 +764,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run test:unit -- --coverage
       - uses: actions/upload-artifact@v4
@@ -766,7 +780,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run test:functional -- --coverage
       - uses: actions/upload-artifact@v4
@@ -782,7 +796,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build
@@ -883,11 +897,13 @@ GET    /api/health                            # Health check
 All requests and responses use JSON. Pagination follows a consistent pattern:
 
 **Paginated List Request:**
+
 ```
 GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ```
 
 **Paginated List Response:**
+
 ```json
 {
   "data": [
@@ -913,31 +929,30 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Invalid wine data",
-    "details": [
-      { "field": "vintage", "message": "Must be between 1800 and current year" }
-    ]
+    "details": [{ "field": "vintage", "message": "Must be between 1800 and current year" }]
   }
 }
 ```
 
 **Standard HTTP Status Codes:**
 
-| Code | Usage |
-|------|-------|
-| 200 | Successful GET, PUT, PATCH |
-| 201 | Successful POST (resource created) |
-| 204 | Successful DELETE |
-| 400 | Validation error |
-| 401 | Not authenticated |
-| 403 | Not authorized (wrong role) |
-| 404 | Resource not found |
-| 409 | Conflict (e.g., duplicate entry) |
-| 500 | Internal server error |
+| Code | Usage                              |
+| ---- | ---------------------------------- |
+| 200  | Successful GET, PUT, PATCH         |
+| 201  | Successful POST (resource created) |
+| 204  | Successful DELETE                  |
+| 400  | Validation error                   |
+| 401  | Not authenticated                  |
+| 403  | Not authorized (wrong role)        |
+| 404  | Resource not found                 |
+| 409  | Conflict (e.g., duplicate entry)   |
+| 500  | Internal server error              |
 
 ---
 
@@ -986,27 +1001,27 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 
 ### High Risk
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
+| Risk                                | Impact                                               | Probability           | Mitigation                                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | **SQLite single-writer contention** | Write requests fail or queue under concurrent writes | Low (small user base) | WAL mode + `busy_timeout = 5000ms`. Monitor for SQLITE_BUSY errors. If frequent, batch writes in transactions or queue writes server-side. |
-| **Data loss (disk failure)** | Entire collection lost | Low | Daily automated backups to GCS. Periodic backup verification by restoring to a test DB. VM persistent disk provides some redundancy. |
-| **Single VM failure** | Application offline | Medium | PM2 auto-restart on crash. GCP VM uptime SLA. Acceptable for personal use — no HA required. Document manual recovery steps. |
+| **Data loss (disk failure)**        | Entire collection lost                               | Low                   | Daily automated backups to GCS. Periodic backup verification by restoring to a test DB. VM persistent disk provides some redundancy.       |
+| **Single VM failure**               | Application offline                                  | Medium                | PM2 auto-restart on crash. GCP VM uptime SLA. Acceptable for personal use — no HA required. Document manual recovery steps.                |
 
 ### Medium Risk
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| **SQLite file corruption** | Database unreadable | Very Low | WAL mode reduces corruption risk. Integrity check via `PRAGMA integrity_check` in backup script. Keep multiple backup generations. |
-| **Disk space exhaustion** | DB writes fail | Low | Monitor disk usage. SQLite DB for 10,000 bottles is ~5–10MB — minimal risk. Set up GCP disk usage alert at 80%. |
-| **JWT secret compromise** | Unauthorized access | Low | Store secrets in environment variables, not in code. Rotate secrets periodically. Refresh token rotation limits blast radius. |
-| **Dependency vulnerability** | Security exploit | Medium | `npm audit` in CI pipeline. Dependabot alerts enabled. Pin major versions. |
+| Risk                         | Impact              | Probability | Mitigation                                                                                                                         |
+| ---------------------------- | ------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **SQLite file corruption**   | Database unreadable | Very Low    | WAL mode reduces corruption risk. Integrity check via `PRAGMA integrity_check` in backup script. Keep multiple backup generations. |
+| **Disk space exhaustion**    | DB writes fail      | Low         | Monitor disk usage. SQLite DB for 10,000 bottles is ~5–10MB — minimal risk. Set up GCP disk usage alert at 80%.                    |
+| **JWT secret compromise**    | Unauthorized access | Low         | Store secrets in environment variables, not in code. Rotate secrets periodically. Refresh token rotation limits blast radius.      |
+| **Dependency vulnerability** | Security exploit    | Medium      | `npm audit` in CI pipeline. Dependabot alerts enabled. Pin major versions.                                                         |
 
 ### Low Risk
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| **Outgrowing SQLite** | Performance degradation | Very Low (at <50K bottles) | Query builder (Drizzle) abstracts the DB layer. Migration path to PostgreSQL is straightforward. |
-| **Need for mobile app** | Users want native mobile experience | Low | Responsive SPA works on mobile browsers. API-first design enables future native app. |
+| Risk                    | Impact                              | Probability                | Mitigation                                                                                       |
+| ----------------------- | ----------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Outgrowing SQLite**   | Performance degradation             | Very Low (at <50K bottles) | Query builder (Drizzle) abstracts the DB layer. Migration path to PostgreSQL is straightforward. |
+| **Need for mobile app** | Users want native mobile experience | Low                        | Responsive SPA works on mobile browsers. API-first design enables future native app.             |
 
 ---
 
@@ -1015,6 +1030,7 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ### Phase 1: Foundation (Weeks 1–2)
 
 **Deliverables:**
+
 - [ ] Project scaffolding (monorepo, TypeScript, Vite, Fastify)
 - [ ] SQLite database setup with Drizzle ORM (schema, migrations, WAL mode)
 - [ ] User authentication (JWT login, refresh, middleware)
@@ -1027,6 +1043,7 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ### Phase 2: Core Inventory (Weeks 3–4)
 
 **Deliverables:**
+
 - [ ] Wine CRUD API + frontend pages (list, detail, add, edit)
 - [ ] Bottle CRUD API + frontend (add bottles, update status)
 - [ ] Storage location management
@@ -1038,6 +1055,7 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ### Phase 3: Tasting & Analytics (Weeks 5–6)
 
 **Deliverables:**
+
 - [ ] Tasting notes API + frontend (add/edit/view notes with ratings)
 - [ ] Dashboard with collection statistics and charts
 - [ ] Drink window alerts
@@ -1049,6 +1067,7 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 ### Phase 4: Polish & Deploy (Weeks 7–8)
 
 **Deliverables:**
+
 - [ ] End-to-end tests (Playwright, all 15 feature tests)
 - [ ] GCP VM provisioning and Nginx configuration
 - [ ] Production deployment pipeline (GitHub Actions → SSH → PM2)
@@ -1066,16 +1085,16 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 
 ### Open Questions
 
-| # | Question | Impact | Default Assumption |
-|---|----------|--------|--------------------|
-| **Q1** | Should wine images be supported (bottle photos, label scans)? | Requires file storage (GCS bucket or local disk) | No images in v1; add in v2 if needed |
-| **Q2** | Is barcode/label scanning desired (via phone camera)? | Significant frontend complexity; possible third-party API integration | Out of scope for v1 |
-| **Q3** | Should the app integrate with any wine databases (e.g., Wine-Searcher, Vivino API) for auto-populating wine data? | Dependency on external APIs, potential cost | No external integrations in v1; manual data entry only |
-| **Q4** | What is the domain name / will there be a custom domain? | Affects TLS setup and CORS configuration | Use a custom domain with Let's Encrypt |
-| **Q5** | Should there be email notifications (e.g., drink window alerts)? | Requires email service integration | No email in v1; alerts shown in-app only |
-| **Q6** | What is the expected maximum collection size? | Affects indexing strategy and query optimization | Designed for up to 10,000 bottles; tested up to 50,000 |
-| **Q7** | Will multiple separate collections be needed (e.g., personal + restaurant)? | Schema and auth model changes | Single collection shared by all users in v1 |
-| **Q8** | Is there a preference for the GCP region? | Latency | us-central1 (Iowa) as default |
+| #      | Question                                                                                                          | Impact                                                                | Default Assumption                                     |
+| ------ | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------ |
+| **Q1** | Should wine images be supported (bottle photos, label scans)?                                                     | Requires file storage (GCS bucket or local disk)                      | No images in v1; add in v2 if needed                   |
+| **Q2** | Is barcode/label scanning desired (via phone camera)?                                                             | Significant frontend complexity; possible third-party API integration | Out of scope for v1                                    |
+| **Q3** | Should the app integrate with any wine databases (e.g., Wine-Searcher, Vivino API) for auto-populating wine data? | Dependency on external APIs, potential cost                           | No external integrations in v1; manual data entry only |
+| **Q4** | What is the domain name / will there be a custom domain?                                                          | Affects TLS setup and CORS configuration                              | Use a custom domain with Let's Encrypt                 |
+| **Q5** | Should there be email notifications (e.g., drink window alerts)?                                                  | Requires email service integration                                    | No email in v1; alerts shown in-app only               |
+| **Q6** | What is the expected maximum collection size?                                                                     | Affects indexing strategy and query optimization                      | Designed for up to 10,000 bottles; tested up to 50,000 |
+| **Q7** | Will multiple separate collections be needed (e.g., personal + restaurant)?                                       | Schema and auth model changes                                         | Single collection shared by all users in v1            |
+| **Q8** | Is there a preference for the GCP region?                                                                         | Latency                                                               | us-central1 (Iowa) as default                          |
 
 ### Assumptions
 
@@ -1092,4 +1111,4 @@ GET /api/wines?page=1&limit=25&sort=vintage&order=desc&color=red&region=Burgundy
 
 ---
 
-*This PRD is a living document. Update it as decisions are made on the open questions above.*
+_This PRD is a living document. Update it as decisions are made on the open questions above._

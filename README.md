@@ -17,6 +17,7 @@ docs/PRD.md
 ```
 
 The PRD covers:
+
 - Problem statement and solution overview
 - User personas and stories
 - Functional requirements (data models, features, API design)
@@ -33,6 +34,7 @@ The PRD covers:
 Break the PRD down into actionable, well-scoped GitHub issues organized by milestone.
 
 Each issue includes:
+
 - Detailed requirements extracted from the relevant PRD sections
 - Acceptance criteria as a checklist
 - Labels for area (`area:backend`, `area:frontend`, `area:database`, etc.) and type (`type:feature`, `type:setup`)
@@ -57,6 +59,7 @@ docs/ROADMAP.md
 ```
 
 The roadmap includes:
+
 - Visual overview of all phases
 - Issue dependency graph showing execution order
 - Week-by-week focus areas with parallel backend/frontend tracks
@@ -86,14 +89,14 @@ The roadmap includes:
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, Vite, React Router v7, TanStack Query, Tailwind CSS, shadcn/ui |
-| Backend | Node.js, Fastify, better-sqlite3, Drizzle ORM, Zod |
-| Database | SQLite (WAL mode), FTS5 full-text search |
-| Testing | Vitest, React Testing Library, Supertest, Playwright |
-| CI/CD | GitHub Actions |
-| Infrastructure | GCP VM, Nginx, PM2, Let's Encrypt |
+| Layer          | Technology                                                               |
+| -------------- | ------------------------------------------------------------------------ |
+| Frontend       | React 19, Vite, React Router v7, TanStack Query, Tailwind CSS, shadcn/ui |
+| Backend        | Node.js, Fastify, better-sqlite3, Drizzle ORM, Zod                       |
+| Database       | SQLite (WAL mode), FTS5 full-text search                                 |
+| Testing        | Vitest, React Testing Library, Supertest, Playwright                     |
+| CI/CD          | GitHub Actions                                                           |
+| Infrastructure | GCP VM, Nginx, PM2, Let's Encrypt                                        |
 
 ## Project Status
 
@@ -101,9 +104,9 @@ See the [Roadmap](docs/ROADMAP.md) for current progress.
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [PRD](docs/PRD.md) | Product requirements, architecture, and API design |
+| Document                   | Description                                               |
+| -------------------------- | --------------------------------------------------------- |
+| [PRD](docs/PRD.md)         | Product requirements, architecture, and API design        |
 | [Roadmap](docs/ROADMAP.md) | Development timeline, dependencies, and progress tracking |
 
 ## License
